@@ -1,0 +1,7 @@
+dataset: small_tool
+
+root_path: 'D:/Datasets'
+data_path: '/small_tool'
+num_task: 7  # 类别数
+data_size: 256
+data_crop_size: 256

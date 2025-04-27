@@ -1,0 +1,40 @@
+model: draem
+train_batch_size: 16 # 8
+valid_batch_size: 1
+net: net_draem  
+num_epochs: 50 # 700
+train_aug_type: normal
+valid_aug_type: normal
+data_size: 256
+data_crop_size: 256
+mask_size: 256
+mask_crop_size: 256
+
+_name: draem 
+_pretrained: True
+_use_dis: False
+_fix_head: True
+_save_anormal : True
+_n_feat: 304
+_fc_internal: 1024
+_n_coupling_blocks: 4
+_clamp: 3
+_n_scales: 3
+
+_optimizer_name: adam
+_weight_decay: 0.00003
+_momentum: 0.9
+_warmup_epochs: 10
+_warmup_lr: 0
+_base_lr: 0.0001 
+_gamma: 0.2
+_final_lr: 0
+_test_epochs: 10
+_alpha: 0.4
+_beta: 0.5
+_num_classes: 2
+_eval_classifier: density # head, density
+_visualization: False
+
+
+

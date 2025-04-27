@@ -1,0 +1,11 @@
+dataset: mvtecloco
+root_path: '/disk4/xgy'
+data_path: '/mvtecloco'
+num_task: 5 
+data_size: 256
+data_crop_size: 256
+mask_size: 256
+mask_crop_size: 256
+niceness: 19
+curve_max_distance: 0.01
+num_parallel_workers: 8
