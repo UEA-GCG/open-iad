@@ -3,6 +3,8 @@ import cv2
 from tools.visualize import save_anomaly_map
 from configuration.registration import setting_name
 from rich import print
+from sklearn.metrics import roc_curve
+import numpy as np
 
 __all__ = ['RecordHelper']
 
@@ -91,12 +93,38 @@ class RecordHelper():
 
         save_path = os.path.join(save_dir, 'result.txt')
 
+        # roc curve and best threshold
+        fpr, tpr, thresholds = roc_curve(img_gt_list, img_pred_list)
+        youden_index = tpr - fpr
+        optimal_idx = np.argmax(youden_index)
+        optimal_threshold = thresholds[optimal_idx]
+        optimal_fpr = fpr[optimal_idx]
+        optimal_tpr = tpr[optimal_idx]
+
+        pred_binary_list = [1 if pred >= optimal_threshold else 0 for pred in img_pred_list]
+
+        correct = sum(1 for pred, gt in zip(pred_binary_list, img_gt_list) if pred==gt)
+        total = len(img_gt_list)
+        acc = correct/total if total > 0 else 0.0
+
+        TP = sum(1 for pred, gt in zip(pred_binary_list, img_gt_list) if pred == 1 and gt == 1)
+        # TN = sum(1 for pred, gt in zip(pred_binary_list, img_gt_list) if pred == 0 and gt == 0)
+        FP = sum(1 for pred, gt in zip(pred_binary_list, img_gt_list) if pred == 1 and gt == 0)
+        # FN = sum(1 for pred, gt in zip(pred_binary_list, img_gt_list) if pred == 0 and gt == 1)
+
+        # jing que lv
+        Precision = TP / (TP+FP) if (TP+FP)>0 else 0.0
+
         try:
             with open(save_path, 'a', encoding='utf-8') as f:
-                f.write("Prediction\tGround Truth\tImage Path\n")
+                f.write(f"Optimal Threshold:{optimal_threshold:.3f}\n")
+                f.write(f"Optimal TPR:{optimal_tpr:.3f}, Optimal FPR:{optimal_fpr:.3f}\n")
+                f.write(f"Accuracy:{acc:.3f}\n")
+                f.write(f"Precision:{Precision:.3f}\n")
+                f.write("Prediction\tPredcition(Threshold)\tGround Truth\tImage Path\n")
                 # 逐行写入每个样本的信息
-                for img_path, pred, gt in zip(img_path_list, img_pred_list, img_gt_list):
-                    f.write(f"{pred:.3f}\t{gt}\t{img_path}\n")
+                for img_path, pred, pred_binary, gt in zip(img_path_list, img_pred_list, pred_binary_list, img_gt_list):
+                    f.write(f"{pred:.3f}\t{pred_binary}\t{gt}\t{img_path}\n")
 
         except Exception as e:
             print(f"Error writing to {save_path}: {e}")
